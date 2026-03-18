@@ -1,0 +1,10 @@
+# Optional defaults for run_batch_scoring (overridable in code / CLI args if added later)
+
+paths:
+  input_batch: "data/input_batches/batch_001.csv"
+  output_csv: "data/scored_outputs/scored_batch_001.csv"
+  model: "models/churn_model.joblib"
+
+scoring:
+  threshold: 0.35
+  model_version: "churn_v1"

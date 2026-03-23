@@ -22,3 +22,4 @@ data/scored_outputs/*
 # Local-only: portfolio planning, long-form notes, non-English drafts — not part of the public package
 0_meta/
 freelance.md
+layout-shell

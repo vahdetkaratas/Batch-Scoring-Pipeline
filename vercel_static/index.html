@@ -3,573 +3,280 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Offline batch ML pipeline: validate CSV, score with a trained churn model, export scored CSV. Python, pandas, scikit-learn.">
-  <meta name="theme-color" content="#0a0c10">
+  <meta name="description" content="Batch churn scoring: validated CSV in, scored CSV out. Training-aligned preprocessing, predict_proba, CLI with exit codes, pytest. Run locally or in CI — this site does not host a live model.">
+  <meta name="theme-color" content="#191923">
+  <link rel="canonical" href="https://batch-scoring.vahdetkaratas.com/">
   <meta property="og:title" content="Batch Scoring Pipeline">
-  <meta property="og:description" content="Batch inference workflow — not a prediction API. CSV in, validated, scored, CSV out.">
+  <meta property="og:description" content="Validated CSV → scored CSV: training-aligned preprocessing, joblib model, CLI and pytest. Not a hosted API — scoring runs in your environment.">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://batch-scoring.vahdetkaratas.com/">
+  <meta property="og:site_name" content="Batch Scoring Pipeline">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Batch Scoring Pipeline">
-  <meta name="twitter:description" content="Batch ML scoring pipeline for portfolio / interviews.">
-  <title>Batch Scoring Pipeline</title>
+  <meta name="twitter:description" content="Batch churn scoring: validated CSV in, scored CSV out. CLI, training-aligned preprocessing, pytest. No live model on the static site.">
+  <title>Batch Scoring Pipeline — validated CSV → scored CSV (CLI)</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23141820'/%3E%3Cpath fill='%23f59e0b' d='M8 22V10h3v12H8zm6-7V10h3v5c0 2 1.5 3.5 3.5 3.5S24 17 24 15v-5h3v5c0 3.5-2.8 6.5-6.5 6.5S14 18.5 14 15z'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #0a0c10;
-      --bg-elevated: #12151c;
-      --border: #2a3140;
-      --text: #eef1f7;
-      --muted: #8b95a8;
-      --accent: #f0a030;
-      --accent-hover: #ffb84d;
-      --accent-glow: rgba(240, 160, 48, 0.12);
-      --ok: #3ecf8e;
-      --font-sans: "Outfit", system-ui, sans-serif;
-      --font-mono: "JetBrains Mono", ui-monospace, monospace;
-      --radius: 10px;
-      --step: 0.05s;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
-    }
-
-    *, *::before, *::after { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      font-family: var(--font-sans);
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      min-height: 100vh;
-    }
-
-    .bg {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      background:
-        radial-gradient(ellipse 80% 50% at 50% -20%, var(--accent-glow), transparent 55%),
-        radial-gradient(ellipse 60% 40% at 100% 50%, rgba(62, 207, 142, 0.04), transparent 50%);
-    }
-    .grain {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0.035;
-      z-index: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    }
-
-    .wrap {
-      position: relative;
-      z-index: 1;
-      max-width: 880px;
-      margin: 0 auto;
-      padding: 0 1.35rem 3.5rem;
-    }
-
-    a:focus-visible, .btn:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 3px;
-    }
-
-    .skip {
-      position: absolute;
-      left: -9999px;
-      top: 0.5rem;
-      padding: 0.5rem 1rem;
-      background: var(--accent);
-      color: var(--bg);
-      font-weight: 600;
-      z-index: 100;
-      border-radius: 4px;
-    }
-    .skip:focus { left: 0.5rem; }
-
-    header {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 1.35rem 0 1.75rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .logo {
-      font-weight: 700;
-      font-size: 0.88rem;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-    .logo span { color: var(--accent); }
-
-    .nav-actions {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.65rem;
-    }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.45rem;
-      padding: 0.55rem 1.05rem;
-      font-family: var(--font-sans);
-      font-weight: 600;
-      font-size: 0.875rem;
-      text-decoration: none;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, color 0.18s ease;
-    }
-    .btn-primary {
-      background: var(--accent);
-      color: #1a1206;
-    }
-    .btn-primary:hover {
-      background: var(--accent-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 10px 28px rgba(240, 160, 48, 0.22);
-    }
-    .btn-ghost {
-      background: transparent;
-      color: var(--muted);
-      border: 1px solid var(--border);
-    }
-    .btn-ghost:hover {
-      color: var(--text);
-      border-color: var(--muted);
-      background: var(--bg-elevated);
-    }
-    .btn svg { width: 17px; height: 17px; fill: currentColor; flex-shrink: 0; }
-
-    main section {
-      margin-top: 3.25rem;
-      opacity: 0;
-      animation: enter 0.6s ease forwards;
-    }
-    main section.hero {
-      opacity: 1;
-      animation: none;
-    }
-    main section:nth-of-type(2) { animation-delay: calc(var(--step) * 1); }
-    main section:nth-of-type(3) { animation-delay: calc(var(--step) * 2); }
-    main section:nth-of-type(4) { animation-delay: calc(var(--step) * 3); }
-    main section:nth-of-type(5) { animation-delay: calc(var(--step) * 4); }
-    main section:nth-of-type(6) { animation-delay: calc(var(--step) * 5); }
-    @keyframes enter {
-      from { opacity: 0; transform: translateY(14px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .hero { padding: 2.5rem 0 0.5rem; margin-top: 0 !important; }
-    .hero .hero-badge {
-      display: inline-block;
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      font-weight: 500;
-      padding: 0.38rem 0.7rem;
-      background: rgba(240, 160, 48, 0.12);
-      color: var(--accent);
-      border-radius: 6px;
-      margin-bottom: 1.2rem;
-      letter-spacing: 0.06em;
-    }
-    h1 {
-      font-size: clamp(1.85rem, 5.2vw, 2.65rem);
-      font-weight: 700;
-      line-height: 1.1;
-      margin: 0 0 1.1rem;
-      letter-spacing: -0.025em;
-      max-width: 18ch;
-    }
-    .hero-lead {
-      font-size: 1.08rem;
-      font-weight: 400;
-      color: var(--muted);
-      max-width: 42ch;
-      margin: 0 0 1.5rem;
-    }
-    .hero-cta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.65rem;
-      margin-bottom: 1.5rem;
-    }
-    .hero-note {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.65rem;
-      max-width: 48ch;
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      color: var(--ok);
-      line-height: 1.45;
-      margin: 0;
-    }
-    .hero-note::before {
-      content: "";
-      width: 3px;
-      min-height: 2.5rem;
-      background: var(--ok);
-      border-radius: 2px;
-      flex-shrink: 0;
-    }
-    .metrics {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem 1.75rem;
-      margin-top: 1.75rem;
-      padding-top: 1.25rem;
-      border-top: 1px solid var(--border);
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      color: var(--muted);
-    }
-    .metrics span { color: var(--text); font-weight: 500; }
-
-    h2 {
-      font-size: 0.72rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: var(--muted);
-      margin: 0 0 1.1rem;
-    }
-
-    .compare {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-    @media (max-width: 680px) { .compare { grid-template-columns: 1fr; } }
-    .card {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.35rem 1.4rem;
-    }
-    .card h3 {
-      margin: 0 0 0.45rem;
-      font-size: 1.02rem;
-      font-weight: 600;
-    }
-    .card p { margin: 0; font-size: 0.9rem; color: var(--muted); line-height: 1.55; }
-    .card.featured {
-      border-color: rgba(240, 160, 48, 0.45);
-      box-shadow: 0 0 0 1px rgba(240, 160, 48, 0.08) inset;
-      background: linear-gradient(165deg, var(--bg-elevated) 0%, rgba(240, 160, 48, 0.05) 100%);
-    }
-
-    /* Pipeline: horizontal desktop, vertical mobile with connectors */
-    .pipeline-wrap { margin-top: 0.35rem; }
-    .pipeline {
-      display: flex;
-      align-items: stretch;
-      font-family: var(--font-mono);
-      font-size: 0.74rem;
-    }
-    .pipe-step {
-      flex: 1;
-      min-width: 0;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      padding: 1rem 0.65rem;
-      text-align: center;
-      position: relative;
-    }
-    .pipe-step:first-child { border-radius: 8px 0 0 8px; }
-    .pipe-step:last-child { border-radius: 0 8px 8px 0; }
-    .pipe-step .step-label {
-      display: block;
-      color: var(--accent);
-      font-size: 0.62rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 0.4rem;
-    }
-    .pipe-step .step-name { color: var(--text); font-weight: 500; }
-    .pipe-step:not(:last-child)::after {
-      content: "→";
-      position: absolute;
-      right: -0.58rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--muted);
-      font-size: 0.95rem;
-      z-index: 2;
-      background: var(--bg);
-      padding: 0 0.15rem;
-    }
-
-    @media (max-width: 720px) {
-      .pipeline { flex-direction: column; }
-      .pipe-step {
-        border-radius: 0 !important;
-        border-bottom: none;
-        padding: 0.95rem 1rem;
-        text-align: left;
-        display: grid;
-        grid-template-columns: auto 1fr;
-        gap: 0.35rem 1rem;
-        align-items: center;
-      }
-      .pipe-step:first-child { border-radius: 8px 8px 0 0 !important; }
-      .pipe-step:last-child { border-radius: 0 0 8px 8px !important; border-bottom: 1px solid var(--border); }
-      .pipe-step:not(:last-child)::after {
-        content: "↓";
-        position: static;
-        transform: none;
-        grid-column: 1 / -1;
-        text-align: center;
-        padding: 0.2rem 0;
-        background: var(--bg);
-        border-left: 1px solid var(--border);
-        border-right: 1px solid var(--border);
-        color: var(--accent);
-        font-size: 1.1rem;
-      }
-      .pipe-step .step-label { margin: 0; }
-    }
-
-    .stack { display: flex; flex-wrap: wrap; gap: 0.45rem; }
-    .tag {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      padding: 0.38rem 0.62rem;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
-    }
-
-    .schemas {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.1rem;
-    }
-    @media (max-width: 640px) { .schemas { grid-template-columns: 1fr; } }
-    .schema-box h3 {
-      font-size: 0.78rem;
-      font-weight: 600;
-      margin: 0 0 0.55rem;
-      color: var(--accent);
-      letter-spacing: 0.04em;
-    }
-    .schema-box pre {
-      margin: 0;
-      padding: 1rem 1.1rem;
-      background: #06080c;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-family: var(--font-mono);
-      font-size: 0.66rem;
-      line-height: 1.55;
-      overflow-x: auto;
-      color: var(--muted);
-    }
-    .schema-box pre .k { color: var(--ok); }
-
-    .pitch {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.45rem 1.5rem 1.3rem;
-    }
-    .pitch ul {
-      margin: 0;
-      padding-left: 1.15rem;
-      color: var(--muted);
-      font-size: 0.93rem;
-    }
-    .pitch li { margin-bottom: 0.85rem; }
-    .pitch li:last-child { margin-bottom: 0; }
-    .pitch li strong { color: var(--text); font-weight: 600; }
-    .pitch code {
-      font-family: var(--font-mono);
-      font-size: 0.84em;
-      color: var(--accent);
-      background: rgba(240, 160, 48, 0.1);
-      padding: 0.12em 0.35em;
-      border-radius: 4px;
-    }
-
-    .notebook-cta {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.15rem 1.35rem;
-      font-size: 0.93rem;
-      color: var(--muted);
-      line-height: 1.55;
-    }
-    .notebook-cta strong { color: var(--text); font-weight: 600; }
-    .notebook-cta a {
-      color: var(--accent);
-      font-weight: 600;
-      text-decoration: none;
-    }
-    .notebook-cta a:hover { text-decoration: underline; color: var(--accent-hover); }
-    .notebook-cta code {
-      font-family: var(--font-mono);
-      font-size: 0.78em;
-      color: var(--accent);
-      background: rgba(240, 160, 48, 0.08);
-      padding: 0.1em 0.35em;
-      border-radius: 4px;
-    }
-
-    footer {
-      margin-top: 3.5rem;
-      padding-top: 1.75rem;
-      border-top: 1px solid var(--border);
-      text-align: center;
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-    footer .name { font-weight: 600; color: var(--text); letter-spacing: 0.02em; }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="shell.css">
+  <link rel="stylesheet" href="project.css">
 </head>
 <body>
-  <div class="bg" aria-hidden="true"></div>
-  <div class="grain" aria-hidden="true"></div>
-  <a class="skip" href="#main">Skip to content</a>
+  <div class="shell-outer">
+    <div class="shell-card">
+      <div class="art-info-bar">
+        <div class="art-info-bar-frame">
+          <div class="art-info-bar-header">
+            <button type="button" class="art-info-bar-btn" aria-label="Toggle info" aria-expanded="false">
+              <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
+            </button>
+          </div>
 
-  <div class="wrap">
-    <header>
-      <div class="logo" id="top">Batch <span>Scoring</span></div>
-      <div class="nav-actions">
-        <!-- Replace vahdetkaratas/Batch-Scoring-Pipeline with your GitHub path -->
-        <a class="btn btn-ghost" href="https://github.com/vahdetkaratas/Batch-Scoring-Pipeline#readme" target="_blank" rel="noopener">README &amp; setup</a>
-        <a class="btn btn-primary" href="https://github.com/vahdetkaratas/Batch-Scoring-Pipeline" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-          Source code
-        </a>
-      </div>
-    </header>
+          <div class="art-header">
+            <div class="art-avatar">
+              <a href="https://vahdetkaratas.com/img/face-1.jpg" class="art-avatar-curtain">
+                <img src="https://vahdetkaratas.com/img/face-1.jpg" alt="Vahdettin Karataş" width="90" height="90">
+                <i class="fas fa-expand" aria-hidden="true"></i>
+              </a>
+              <div class="art-lamp-light">
+                <div class="art-available-lamp"></div>
+              </div>
+            </div>
+            <h5 class="art-name mb-10"><a href="https://vahdetkaratas.com/">Vahdettin Karataş</a></h5>
+            <div class="art-sm-text">Data &amp; Reporting Consultant</div>
+            <div class="art-sm-text art-muted mb-10">Available for 1-2 projects / month</div>
+          </div>
 
-    <main id="main">
-      <section class="hero">
-        <span class="hero-badge">Portfolio · Applied ML</span>
-        <h1>Batch scoring for real pipelines.</h1>
-        <p class="hero-lead">
-          Turn a customer CSV into a scored file: validation, training-aligned features, <code style="font-family:var(--font-mono);font-size:0.92em;color:var(--accent)">predict_proba</code>, versioned output. Built for jobs that look like ETL — not microsecond APIs.
-        </p>
-        <div class="hero-cta">
-          <a class="btn btn-primary" href="https://github.com/vahdetkaratas/Batch-Scoring-Pipeline" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-            View on GitHub
-          </a>
-          <a class="btn btn-ghost" href="https://github.com/vahdetkaratas/Batch-Scoring-Pipeline#readme" target="_blank" rel="noopener">How to run</a>
-        </div>
-        <p class="hero-note">Static showcase. Scoring runs on your machine or in CI — there is no live model on this page.</p>
-        <div class="metrics" aria-label="Project facts">
-          <div><span>Tests</span> · pytest suite</div>
-          <div><span>CLI</span> · flags &amp; exit codes</div>
-          <div><span>Optional</span> · run .meta.json</div>
-        </div>
-      </section>
+          <div id="scrollbar2" class="art-scroll-frame">
+            <div class="art-table p-15-15">
+              <ul>
+                <li><h6>Location:</h6><span>Prague, Czech Republic</span></li>
+              </ul>
+            </div>
 
-      <section id="shape" aria-labelledby="h-shape">
-        <h2 id="h-shape">Positioning</h2>
-        <div class="compare">
-          <article class="card featured">
-            <h3>This project: batch</h3>
-            <p>File or schedule driven: ingest → validate → score → hand off CSV (or parquet) to CRM, analytics, or compliance. Same pattern as many production churn or risk batch jobs.</p>
-          </article>
-          <article class="card">
-            <h3>Contrast: online API</h3>
-            <p>Request/response, SLOs, autoscaling. Valuable, but a different skill slice. This repo stays intentionally narrow: offline orchestration and clean batch output.</p>
-          </article>
-        </div>
-      </section>
+            <div class="art-ls-divider"></div>
 
-      <section id="flow" aria-labelledby="h-flow">
-        <h2 id="h-flow">End-to-end flow</h2>
-        <div class="pipeline-wrap">
-          <div class="pipeline" role="list">
-            <div class="pipe-step" role="listitem"><span class="step-label">In</span><span class="step-name">Raw CSV</span></div>
-            <div class="pipe-step" role="listitem"><span class="step-label">Gate</span><span class="step-name">Validate</span></div>
-            <div class="pipe-step" role="listitem"><span class="step-label">Prep</span><span class="step-name">Preprocess</span></div>
-            <div class="pipe-step" role="listitem"><span class="step-label">Score</span><span class="step-name">Model</span></div>
-            <div class="pipe-step" role="listitem"><span class="step-label">Out</span><span class="step-name">Scored CSV</span></div>
+            <div class="art-knowledge-block p-30-15">
+              <h6 class="mb-15">Tools &amp; Focus Areas</h6>
+              <ul class="art-knowledge-list p-15-0">
+                <li>Dashboards &amp; reporting</li>
+                <li>Data cleaning &amp; analysis</li>
+                <li>Reporting workflows</li>
+                <li>Data pipelines &amp; ETL</li>
+                <li>ML training → serving patterns</li>
+              </ul>
+            </div>
+
+            <div class="art-knowledge-block p-30-15">
+              <h6 class="mb-15">How I can help</h6>
+              <ul class="art-knowledge-list p-15-0">
+                <li>Client work: dashboards, reports, automation</li>
+                <li>ML systems &amp; interactive apps (see menu)</li>
+                <li>Data cleaning &amp; trustworthy spreadsheets</li>
+              </ul>
+            </div>
+
+            <div class="art-knowledge-block p-30-15">
+              <h6 class="mb-15">Recent outcomes</h6>
+              <ul class="art-knowledge-list p-15-0">
+                <li>Weekly reporting time reduced from hours to minutes</li>
+                <li>Cleaner spreadsheets that are easier to maintain</li>
+                <li>Teams get faster answers from their data</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="art-ls-social">
+            <a href="https://github.com/vahdetkaratas" target="_blank" rel="noopener noreferrer" title="Github"><i class="fab fa-github"></i></a>
+            <a href="https://linkedin.com/in/vahdetkaratas" target="_blank" rel="noopener noreferrer" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="https://www.facebook.com/vakasoft/" target="_blank" rel="noopener noreferrer" title="Facebook"><i class="fab fa-facebook-f"></i></a>
           </div>
         </div>
-      </section>
+      </div>
 
-      <section id="stack" aria-labelledby="h-stack">
-        <h2 id="h-stack">Stack</h2>
-        <div class="stack">
-          <span class="tag">Python</span>
-          <span class="tag">pandas</span>
-          <span class="tag">scikit-learn</span>
-          <span class="tag">joblib</span>
-          <span class="tag">PyYAML</span>
-          <span class="tag">pytest</span>
-        </div>
-      </section>
+      <div class="shell-main-wrap" id="shellMainWrap">
+        <div class="shell-mobile-curtain" id="shellMobileCurtain" aria-hidden="true"></div>
+        <div class="shell-main">
+          <main class="shell-scroll" id="shellScroll">
+            <div class="shell-content" id="projectContent">
+              <div class="batch-page">
+                <a class="skip" href="#main">Skip to content</a>
 
-      <section id="contract" aria-labelledby="h-contract">
-        <h2 id="h-contract">I/O contract</h2>
-        <div class="schemas">
-          <div class="schema-box">
-            <h3>Input (Telco-style)</h3>
-            <pre>customerID, tenure, Contract,
+                <div class="wrap">
+                  <header>
+                    <div class="logo" id="top">Batch <span>Scoring</span></div>
+                    <div class="nav-actions">
+                      <!-- Replace vahdetkaratas/Batch-Scoring-Pipeline with your GitHub path -->
+                      <a class="btn btn-ghost" href="https://github.com/vahdetkaratas/Batch-Scoring-Pipeline#readme" target="_blank" rel="noopener">README &amp; setup</a>
+                      <a class="btn btn-primary" href="https://github.com/vahdetkaratas/Batch-Scoring-Pipeline" target="_blank" rel="noopener">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                        Source code
+                      </a>
+                    </div>
+                  </header>
+
+                  <div id="main">
+                    <section class="hero">
+                      <span class="hero-badge">Portfolio · ML systems</span>
+                      <h1>Batch scoring for real pipelines.</h1>
+                      <p class="hero-lead">
+                        Turn a customer CSV into a scored file: validation, training-aligned features, <code style="font-family:var(--font-mono);font-size:0.92em;color:var(--accent)">predict_proba</code>, versioned output. Built for jobs that look like ETL — not microsecond APIs.
+                      </p>
+                      <div class="hero-cta">
+                        <a class="btn btn-primary" href="https://github.com/vahdetkaratas/Batch-Scoring-Pipeline" target="_blank" rel="noopener">
+                          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                          View on GitHub
+                        </a>
+                        <a class="btn btn-ghost" href="https://github.com/vahdetkaratas/Batch-Scoring-Pipeline#readme" target="_blank" rel="noopener">How to run</a>
+                      </div>
+                      <p class="hero-note">This page is a static showcase only — no inference runs here. Use the repo CLI on your machine or in CI to score batches.</p>
+                      <div class="metrics" aria-label="Project facts">
+                        <div><span>Tests</span> · pytest suite</div>
+                        <div><span>CLI</span> · flags &amp; exit codes</div>
+                        <div><span>Optional</span> · run .meta.json</div>
+                      </div>
+                    </section>
+
+                    <section id="shape" aria-labelledby="h-shape">
+                      <h2 id="h-shape">Positioning</h2>
+                      <div class="compare">
+                        <article class="card featured">
+                          <h3>This project: batch</h3>
+                          <p>File or schedule driven: ingest → validate → score → hand off CSV (or parquet) to CRM, analytics, or compliance. Same pattern as many production churn or risk batch jobs.</p>
+                        </article>
+                        <article class="card">
+                          <h3>Contrast: online API</h3>
+                          <p>Request/response, SLOs, autoscaling. Valuable, but a different skill slice. This repo stays intentionally narrow: offline orchestration and clean batch output.</p>
+                        </article>
+                      </div>
+                    </section>
+
+                    <section id="flow" aria-labelledby="h-flow">
+                      <h2 id="h-flow">End-to-end flow</h2>
+                      <div class="pipeline-wrap">
+                        <div class="pipeline" role="list">
+                          <div class="pipe-step" role="listitem"><span class="step-label">In</span><span class="step-name">Raw CSV</span></div>
+                          <div class="pipe-step" role="listitem"><span class="step-label">Gate</span><span class="step-name">Validate</span></div>
+                          <div class="pipe-step" role="listitem"><span class="step-label">Prep</span><span class="step-name">Preprocess</span></div>
+                          <div class="pipe-step" role="listitem"><span class="step-label">Score</span><span class="step-name">Model</span></div>
+                          <div class="pipe-step" role="listitem"><span class="step-label">Out</span><span class="step-name">Scored CSV</span></div>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section id="stack" aria-labelledby="h-stack">
+                      <h2 id="h-stack">Stack</h2>
+                      <div class="stack">
+                        <span class="tag">Python</span>
+                        <span class="tag">pandas</span>
+                        <span class="tag">scikit-learn</span>
+                        <span class="tag">joblib</span>
+                        <span class="tag">PyYAML</span>
+                        <span class="tag">pytest</span>
+                      </div>
+                    </section>
+
+                    <section id="contract" aria-labelledby="h-contract">
+                      <h2 id="h-contract">I/O contract</h2>
+                      <div class="schemas">
+                        <div class="schema-box">
+                          <h3>Input (Telco-style)</h3>
+                          <pre>customerID, tenure, Contract,
 MonthlyCharges, TotalCharges,
 PhoneService, InternetService, …</pre>
-          </div>
-          <div class="schema-box">
-            <h3>Output</h3>
-            <pre><span class="k">customer_id</span>
+                        </div>
+                        <div class="schema-box">
+                          <h3>Output</h3>
+                          <pre><span class="k">customer_id</span>
 <span class="k">churn_score</span>
 <span class="k">predicted_label</span>
 <span class="k">model_version</span>
 <span class="k">scoring_timestamp</span></pre>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section id="notebook" aria-labelledby="h-notebook">
+                      <h2 id="h-notebook">Output review (Jupyter)</h2>
+                      <div class="notebook-cta">
+                        <strong>After you run the pipeline locally,</strong> the repo includes a notebook that validates the scored CSV (schema, row counts, probabilities in <code>[0,1]</code>) and plots the churn-score distribution.
+                        <br><br>
+                        <a href="https://github.com/vahdetkaratas/Batch-Scoring-Pipeline/blob/main/notebooks/01_scoring_output_review.ipynb" target="_blank" rel="noopener">View notebook on GitHub →</a>
+                        <span style="opacity:0.75;font-size:0.85em;"> &nbsp;·&nbsp; readable in the browser; clone the repo to execute cells.</span>
+                      </div>
+                    </section>
+
+                    <section id="pitch" aria-labelledby="h-pitch">
+                      <h2 id="h-pitch">Interview pitch (30 seconds)</h2>
+                      <div class="pitch">
+                        <ul>
+                          <li><strong>Problem:</strong> After training, a lot of value is in <em>recurring batch scores</em> — not every product needs a real-time endpoint.</li>
+                          <li><strong>What I shipped:</strong> One pipeline: strict input checks, same feature engineering as training, probabilities and labels, plus model version and timestamp on every row.</li>
+                          <li><strong>Ops detail:</strong> CLI for cron/CI, non-zero exit on failure, optional JSON manifest so you know which input and threshold produced a file.</li>
+                        </ul>
+                      </div>
+                    </section>
+                  </div>
+
+                  <footer class="batch-project-footer">
+                    <p class="name">Batch Scoring Pipeline</p>
+                    <p style="margin:0.35rem 0 0;font-size:0.76rem;">Offline ML batch job · showcase page</p>
+                  </footer>
+                </div>
+              </div>
+            </div>
+
+            <div class="container-fluid p-30-0">
+              <footer class="footer">
+                <div class="art-copy">© <span id="shellYear"></span> Vahdettin Karataş. All rights reserved.</div>
+                <div class="footer-developer">ML systems, reporting &amp; automation.</div>
+              </footer>
+            </div>
+          </main>
+        </div>
+
+        <aside class="shell-rail" aria-label="Home">
+          <div class="shell-rail-header">
+            <a class="shell-rail-home" href="https://vahdetkaratas.com/" id="shellHomeLink" title="Portfolio home" aria-label="Portfolio home">
+              <svg viewBox="0 0 24 24" aria-hidden="true" class="shell-rail-home-icon">
+                <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8h5z"/>
+              </svg>
+            </a>
           </div>
-        </div>
-      </section>
-
-      <section id="notebook" aria-labelledby="h-notebook">
-        <h2 id="h-notebook">Output review (Jupyter)</h2>
-        <div class="notebook-cta">
-          <strong>After you run the pipeline locally,</strong> the repo includes a notebook that validates the scored CSV (schema, row counts, probabilities in <code>[0,1]</code>) and plots the churn-score distribution.
-          <br><br>
-          <a href="https://github.com/vahdetkaratas/Batch-Scoring-Pipeline/blob/main/notebooks/01_scoring_output_review.ipynb" target="_blank" rel="noopener">View notebook on GitHub →</a>
-          <span style="opacity:0.75;font-size:0.85em;"> &nbsp;·&nbsp; readable in the browser; clone the repo to execute cells.</span>
-        </div>
-      </section>
-
-      <section id="pitch" aria-labelledby="h-pitch">
-        <h2 id="h-pitch">Interview pitch (30 seconds)</h2>
-        <div class="pitch">
-          <ul>
-            <li><strong>Problem:</strong> After training, a lot of value is in <em>recurring batch scores</em> — not every product needs a real-time endpoint.</li>
-            <li><strong>What I shipped:</strong> One pipeline: strict input checks, same feature engineering as training, probabilities and labels, plus model version and timestamp on every row.</li>
-            <li><strong>Ops detail:</strong> CLI for cron/CI, non-zero exit on failure, optional JSON manifest so you know which input and threshold produced a file.</li>
-          </ul>
-        </div>
-      </section>
-    </main>
-
-    <footer>
-      <p class="name">Batch Scoring Pipeline</p>
-      <p style="margin:0.35rem 0 0;font-size:0.76rem;">Offline ML batch job · showcase page</p>
-    </footer>
+          <div class="shell-rail-spacer" aria-hidden="true"></div>
+        </aside>
+      </div>
+    </div>
   </div>
+
+  <script>
+    document.getElementById('shellYear').textContent = new Date().getFullYear();
+    (function () {
+      var btn = document.querySelector('.art-info-bar-btn');
+      var bar = document.querySelector('.art-info-bar');
+      var curtain = document.getElementById('shellMobileCurtain');
+      if (!btn || !bar) return;
+      function setOpen(open) {
+        bar.classList.toggle('art-active', open);
+        btn.classList.toggle('art-active', open);
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (curtain) {
+          curtain.classList.toggle('is-open', open);
+          curtain.setAttribute('aria-hidden', open ? 'false' : 'true');
+        }
+      }
+      btn.addEventListener('click', function () {
+        setOpen(!bar.classList.contains('art-active'));
+      });
+      if (curtain) {
+        curtain.addEventListener('click', function () {
+          setOpen(false);
+        });
+      }
+    })();
+  </script>
 </body>
 </html>

@@ -2,6 +2,8 @@
 
 Batch inference for tabular churn: validate a CSV, align features with the training pipeline, score with a joblib model, write a versioned scored CSV. Intended for scheduled / ETL-style workloads, not low-latency APIs.
 
+**Static showcase:** [batch-scoring.vahdetkaratas.com](https://batch-scoring.vahdetkaratas.com/) (source: `vercel_static/` — no live model; scoring is via CLI as below).
+
 **Docs:** [docs/README.md](docs/README.md) · [Architecture](docs/ARCHITECTURE.md) · [Publishing](docs/PUBLISHING.md)  
 **License:** [LICENSE](LICENSE) (MIT)
 
@@ -10,7 +12,7 @@ Batch inference for tabular churn: validate a CSV, align features with the train
 ## Requirements
 
 - **Python 3.10+** (3.13 tested)
-- Trained pipeline at **`models/churn_model.joblib`** (copy from your churn training project)
+- Trained sklearn **pipeline** at **`models/churn_model.joblib`** (not in git — copy from **your churn training project**). This repo is scoring-only; no bundled training code or separate training repository. Preprocessing in `src/scoring/preprocess_input.py` must stay aligned with how that model was trained.
 
 ---
 

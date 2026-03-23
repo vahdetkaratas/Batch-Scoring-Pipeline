@@ -39,6 +39,8 @@ git push -u origin main
 
 See `vercel_static/README.md`.
 
+**Social preview (optional):** `vercel_static/index.html` sets `og:url` and `canonical` to `https://batch-scoring.vahdetkaratas.com/`. For richer link previews, add an image (e.g. 1200×630 PNG) under `vercel_static/` and set `og:image` / `twitter:image` to its absolute URL on that domain.
+
 ## Model binary
 
 Prefer not committing `churn_model.joblib` to keep the repo small and avoid binary drift. Document the copy step in README; cloners place the file under `models/`.

@@ -10,8 +10,8 @@
   --accent-glow: rgba(240, 160, 48, 0.12);
   --ok: #3ecf8e;
   --content-bg: rgb(30, 30, 40);
-  --font-sans: "Outfit", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: "Poppins", system-ui, -apple-system, sans-serif;
+  --font-mono: "Courier Prime", "Courier New", Courier, monospace;
   --radius: 10px;
   --step: 0.05s;
   position: relative;

@@ -508,3 +508,83 @@
   pointer-events: none;
   opacity: 0.85;
 }
+
+/* Interactive demo (FastAPI) */
+.batch-page .demo-section {
+  margin-top: 1.5rem;
+}
+.batch-page .demo-section h2 {
+  margin-top: 0;
+}
+.batch-page .demo-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.batch-page .demo-field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+.batch-page .demo-field input[type="file"] {
+  font-size: 0.85rem;
+  color: var(--text);
+}
+.batch-page .demo-field-inline input[type="number"] {
+  width: 6rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+}
+.batch-page .demo-status {
+  margin: 1rem 0 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+  min-height: 1.25em;
+}
+.batch-page .demo-status--error {
+  color: #f08070;
+}
+.batch-page .demo-results {
+  margin-top: 1.25rem;
+}
+.batch-page .demo-summary,
+.batch-page .demo-columns {
+  font-size: 0.88rem;
+  color: var(--muted);
+  margin: 0 0 0.65rem;
+}
+.batch-page .demo-table-wrap {
+  overflow-x: auto;
+  margin: 0.75rem 0 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+}
+.batch-page .demo-preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+.batch-page .demo-preview-table th,
+.batch-page .demo-preview-table td {
+  padding: 0.45rem 0.65rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.batch-page .demo-preview-table th {
+  color: var(--accent);
+  font-weight: 600;
+}
+.batch-page .demo-download-wrap {
+  margin: 0;
+}

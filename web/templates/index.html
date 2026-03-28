@@ -140,17 +140,22 @@
 
                       <section id="demo" class="demo-section card" aria-labelledby="h-demo">
                         <h2 id="h-demo">Try the pipeline</h2>
-                        <p>Upload a Telco-style customer batch (same shape as the input contract below). The server runs validation, preprocessing, and scoring, then you can download a scored CSV.</p>
+                        <p class="demo-lead">Upload a Telco-style customer batch (same shape as the input contract below), or run on a small built-in sample — no CSV on your machine required. The server validates, preprocesses, and scores; then you can download the result.</p>
+                        <p class="demo-note">Scoring uses the small <strong>E2E fixture model</strong> committed in this repo (under <code>tests/fixtures/</code>) so the full path is real and testable — it is not a production or client-specific model. <strong>Run with sample batch</strong> loads <strong>five</strong> Telco-style rows from the same fixture set.</p>
                         <form id="demo-form" class="demo-form">
                           <div class="demo-field">
                             <label for="demo-file">CSV file</label>
-                            <input type="file" id="demo-file" name="file" accept=".csv,text/csv" required>
+                            <p class="demo-hint">Optional if you use “Run with sample batch”.</p>
+                            <input type="file" id="demo-file" name="file" accept=".csv,text/csv">
                           </div>
                           <div class="demo-field demo-field-inline">
                             <label for="demo-threshold">Classification threshold</label>
                             <input type="number" id="demo-threshold" name="threshold" value="0.35" min="0" max="1" step="0.01">
                           </div>
-                          <button type="submit" class="btn btn-primary" id="demo-submit">Run scoring</button>
+                          <div class="demo-actions">
+                            <button type="submit" class="btn btn-primary" id="demo-submit">Run scoring</button>
+                            <button type="button" class="btn btn-ghost" id="demo-sample">Run with sample batch</button>
+                          </div>
                         </form>
                         <p id="demo-status" class="demo-status" role="status" aria-live="polite"></p>
                         <div id="demo-results" class="demo-results" hidden>
@@ -321,11 +326,17 @@ PhoneService, InternetService, …</pre>
       var tbody = document.getElementById('demo-tbody');
       var downloadWrap = document.getElementById('demo-download-wrap');
       var downloadLink = document.getElementById('demo-download');
-      if (!form || !submitBtn) return;
+      var sampleBtn = document.getElementById('demo-sample');
+      if (!form || !submitBtn || !sampleBtn) return;
 
       function setStatus(msg, isError) {
         statusEl.textContent = msg || '';
         statusEl.classList.toggle('demo-status--error', !!isError);
+      }
+
+      function setBusy(busy) {
+        submitBtn.disabled = busy;
+        sampleBtn.disabled = busy;
       }
 
       function clearResults() {
@@ -345,26 +356,18 @@ PhoneService, InternetService, …</pre>
         return 'Request failed.';
       }
 
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
+      function postScore(file) {
         clearResults();
         setStatus('', false);
-
-        var f = fileInput.files && fileInput.files[0];
-        if (!f) {
-          setStatus('Choose a CSV file first.', true);
-          return;
-        }
-
         var fd = new FormData();
-        fd.append('file', f, f.name);
+        fd.append('file', file, file.name);
         var th = thresholdInput && thresholdInput.value !== '' ? thresholdInput.value : '0.35';
         fd.append('threshold', th);
 
-        submitBtn.disabled = true;
+        setBusy(true);
         setStatus('Scoring… this may take a few seconds.');
 
-        fetch('/api/score', { method: 'POST', body: fd })
+        return fetch('/api/score', { method: 'POST', body: fd })
           .then(function (res) {
             return res.json().then(function (data) {
               return { res: res, data: data };
@@ -408,8 +411,40 @@ PhoneService, InternetService, …</pre>
           .catch(function () {
             setStatus('Network error — is the FastAPI server running?', true);
           })
-          .then(function () {
-            submitBtn.disabled = false;
+          .finally(function () {
+            setBusy(false);
+          });
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var f = fileInput.files && fileInput.files[0];
+        if (!f) {
+          clearResults();
+          setStatus('Choose a CSV file or click “Run with sample batch”.', true);
+          return;
+        }
+        postScore(f);
+      });
+
+      sampleBtn.addEventListener('click', function () {
+        clearResults();
+        setBusy(true);
+        setStatus('Loading sample…', false);
+        fetch('/api/sample-input')
+          .then(function (res) {
+            if (res.ok) return res.blob();
+            return res.json().then(function (d) {
+              throw new Error(apiErrorMessage(d));
+            });
+          })
+          .then(function (blob) {
+            var file = new File([blob], 'telco_sample_batch.csv', { type: 'text/csv' });
+            return postScore(file);
+          })
+          .catch(function (err) {
+            setStatus(err.message || 'Could not load sample.', true);
+            setBusy(false);
           });
       });
     })();

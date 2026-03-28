@@ -1,5 +1,5 @@
 """
-FastAPI shell for the portfolio page: templates, static assets, /api/score, /api/download/{job_id}.
+FastAPI shell: templates, static assets, /api/sample-input, /api/score, /api/download/{job_id}.
 """
 import json
 import logging
@@ -28,6 +28,8 @@ _PREVIEW_ROWS = 10
 
 _TMP_PARENT = Path(tempfile.gettempdir()) / "batch_scoring_demo"
 _TMP_PARENT.mkdir(parents=True, exist_ok=True)
+
+_SAMPLE_INPUT = (_REPO_ROOT / "tests" / "fixtures" / "e2e_input.csv").resolve()
 
 # job_id -> metadata for a future download route (paths + timestamps)
 _jobs: dict[str, dict] = {}
@@ -81,6 +83,21 @@ async def index(request: Request):
     return templates.TemplateResponse(
         "index.html",
         {"request": request},
+    )
+
+
+@app.get("/api/sample-input")
+async def api_sample_input():
+    if not _SAMPLE_INPUT.is_file():
+        logger.error("Sample input missing at %s", _SAMPLE_INPUT)
+        return JSONResponse(
+            status_code=404,
+            content={"error": "Sample batch file is not available on the server.", "code": "no_sample"},
+        )
+    return FileResponse(
+        path=_SAMPLE_INPUT,
+        filename="telco_sample_batch.csv",
+        media_type="text/csv",
     )
 
 

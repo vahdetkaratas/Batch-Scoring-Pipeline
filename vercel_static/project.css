@@ -515,13 +515,53 @@
 }
 .batch-page .demo-section h2 {
   margin-top: 0;
+  margin-bottom: 0.55rem;
+}
+/* Intro + disclaimer — override .card p { margin:0 } */
+.batch-page .card .demo-lead {
+  margin: 0 0 0.7rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.batch-page .card .demo-note {
+  margin: 0 0 1.35rem;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.5;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  max-width: 52rem;
+}
+.batch-page .card .demo-note code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  color: var(--accent);
 }
 .batch-page .demo-form {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 1rem;
-  margin-top: 1rem;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+}
+.batch-page .demo-hint {
+  margin: 0.2rem 0 0.85rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.batch-page .demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.25rem;
 }
 .batch-page .demo-field label {
   display: block;
@@ -531,6 +571,7 @@
   margin-bottom: 0.35rem;
 }
 .batch-page .demo-field input[type="file"] {
+  margin-top: 0.4rem;
   font-size: 0.85rem;
   color: var(--text);
 }
@@ -545,22 +586,29 @@
   font-size: 0.88rem;
 }
 .batch-page .demo-status {
-  margin: 1rem 0 0;
+  margin: 1.5rem 0 0.75rem;
+  padding-top: 0.5rem;
   font-size: 0.88rem;
   color: var(--muted);
-  min-height: 1.25em;
+  line-height: 1.5;
+  min-height: 1.5em;
 }
 .batch-page .demo-status--error {
   color: #f08070;
 }
 .batch-page .demo-results {
-  margin-top: 1.25rem;
+  margin-top: 0.25rem;
+  padding-top: 0.65rem;
 }
 .batch-page .demo-summary,
 .batch-page .demo-columns {
   font-size: 0.88rem;
   color: var(--muted);
   margin: 0 0 0.65rem;
+  line-height: 1.5;
+}
+.batch-page .demo-summary {
+  margin-top: 0.15rem;
 }
 .batch-page .demo-table-wrap {
   overflow-x: auto;

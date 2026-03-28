@@ -71,6 +71,8 @@ make test
 python -m pytest tests/ -v
 ```
 
+**Committed E2E proof:** `tests/test_e2e_scoring.py` runs the full path (`load_batch` → validate → preprocess → `joblib` pipeline → `predict_proba` → postprocess → CSV) using `tests/fixtures/e2e_input.csv` and `tests/fixtures/e2e_pipeline.joblib` — no `pytest.skip`. Regenerate the fixture model after changing preprocess schema or fixture rows: `python scripts/build_e2e_fixture.py`.
+
 ---
 
 ## Python API

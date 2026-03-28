@@ -1,0 +1,6 @@
+customerID,gender,SeniorCitizen,Partner,Dependents,tenure,PhoneService,MultipleLines,InternetService,OnlineSecurity,OnlineBackup,DeviceProtection,TechSupport,StreamingTV,StreamingMovies,Contract,PaperlessBilling,PaymentMethod,MonthlyCharges,TotalCharges
+E2E-AAA1,Female,0,No,No,6,Yes,No,DSL,No,No,No,No,No,No,Month-to-month,Yes,Electronic check,49.95,299.50
+E2E-BBB2,Male,0,Yes,No,18,Yes,Yes,Fiber optic,No,Yes,No,No,Yes,No,One year,No,Mailed check,79.90,1438.20
+E2E-CCC3,Female,1,No,Yes,36,No,No phone service,DSL,Yes,Yes,Yes,Yes,No,No,Two year,Yes,Bank transfer (automatic),54.20,1950.00
+E2E-DDD4,Male,0,No,No,48,Yes,No,No,No,No,No,No,No,No,Month-to-month,No,Electronic check,20.00,960.00
+E2E-EEE5,Female,0,Yes,Yes,24,Yes,No,DSL,Yes,No,No,No,Yes,Yes,Month-to-month,Yes,Credit card (automatic),65.00,1560.00

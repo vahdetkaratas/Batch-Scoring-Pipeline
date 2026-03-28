@@ -24,7 +24,8 @@ def _build_features(df: pd.DataFrame) -> pd.DataFrame:
     out = df.copy()
 
     if "TotalCharges" in out.columns:
-        out["TotalCharges"] = pd.to_numeric(out["TotalCharges"], errors="coerce")
+        # validate_batch must run first; strict parse — no silent NaN from bad strings.
+        out["TotalCharges"] = pd.to_numeric(out["TotalCharges"], errors="raise")
 
     for col in SERVICE_COLUMNS:
         if col in out.columns:

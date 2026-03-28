@@ -1,8 +1,8 @@
 """
-Tests for batch scoring: load_batch, validate_batch, preprocess, score, postprocess.
-Pipeline integration tests.
+Unit and component tests. Optional checks use data/input_batches/batch_001.csv when present.
+
+Committed end-to-end scoring proof (no skip): see tests/test_e2e_scoring.py + tests/fixtures/.
 """
-import json
 import subprocess
 import sys
 from pathlib import Path
@@ -97,62 +97,11 @@ def test_postprocess_predicted_label_respects_threshold():
     assert out2["predicted_label"].iloc[0] == 0
 
 
-def test_run_batch_scoring_output_row_count_and_schema():
-    """Full pipeline: output row count matches input; output has churn_score and required columns."""
-    from src.pipeline.run_batch_scoring import run_batch_scoring
-
-    if not BATCH_001.exists():
-        pytest.skip("batch_001.csv not found")
-    model_path = Path("models/churn_model.joblib")
-    if not model_path.exists():
-        pytest.skip("churn_model.joblib not found; copy from Churn project")
-    out = run_batch_scoring(input_path=BATCH_001)
-    df_in = load_batch(BATCH_001)
-    assert len(out) == len(df_in)
-    assert "churn_score" in out.columns
-    assert "customer_id" in out.columns
-    assert "predicted_label" in out.columns
-    assert "model_version" in out.columns
-    assert "scoring_timestamp" in out.columns
-
-
-def test_run_batch_scoring_write_manifest(tmp_path):
-    """Optional .meta.json next to output."""
-    from src.pipeline.run_batch_scoring import run_batch_scoring
-
-    if not BATCH_001.exists():
-        pytest.skip("batch_001.csv not found")
-    model_path = Path("models/churn_model.joblib")
-    if not model_path.exists():
-        pytest.skip("churn_model.joblib not found")
-    out_csv = tmp_path / "scored.csv"
-    run_batch_scoring(
-        input_path=BATCH_001,
-        output_path=out_csv,
-        write_manifest=True,
-    )
-    meta = tmp_path / "scored.meta.json"
-    assert meta.exists()
-    data = json.loads(meta.read_text(encoding="utf-8"))
-    assert data["row_count"] == len(load_batch(BATCH_001))
-    assert "input_path" in data and "threshold" in data and "model_version" in data
-
-
 def test_main_returns_1_on_missing_input(tmp_path):
     from src.pipeline.run_batch_scoring import main
 
     code = main(["--input", str(tmp_path / "nope.csv"), "-q"])
     assert code == 1
-
-
-def test_main_returns_0_when_pipeline_ok():
-    from src.pipeline.run_batch_scoring import main
-
-    if not BATCH_001.exists() or not Path("models/churn_model.joblib").exists():
-        pytest.skip("need batch and model")
-    out = Path("data/scored_outputs/scored_batch_001.csv")
-    code = main(["-i", str(BATCH_001), "-o", str(out), "-q"])
-    assert code == 0
 
 
 def test_cli_help_exits_zero():

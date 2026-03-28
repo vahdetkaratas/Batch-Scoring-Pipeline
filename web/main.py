@@ -10,7 +10,7 @@ import uuid
 from pathlib import Path
 
 from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -72,7 +72,37 @@ def _sweep_expired_jobs() -> None:
         del _jobs[jid]
 
 
+def _favicon_response() -> FileResponse:
+    path = _VERCEL_STATIC / "favicon.svg"
+    if not path.is_file():
+        logger.warning(
+            "Favicon missing at %s (repo_root=%s cwd=%s)",
+            path,
+            _REPO_ROOT,
+            Path.cwd(),
+        )
+        raise HTTPException(status_code=404, detail="Not found")
+    return FileResponse(path, media_type="image/svg+xml")
+
+
 app = FastAPI()
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon_ico():
+    return RedirectResponse(url="/favicon.svg", status_code=307)
+
+
+@app.get("/favicon.svg", include_in_schema=False)
+async def favicon_svg_root():
+    return _favicon_response()
+
+
+@app.get("/static/favicon.svg", include_in_schema=False)
+async def favicon_svg_under_static():
+    return _favicon_response()
+
+
 app.mount("/static", StaticFiles(directory=str(_VERCEL_STATIC)), name="static")
 
 templates = Jinja2Templates(directory=str(_TEMPLATES))

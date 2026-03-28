@@ -81,10 +81,10 @@ templates = Jinja2Templates(directory=str(_TEMPLATES))
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse(
-        "index.html",
-        {"request": request},
+        request=request,
+        name="index.html",
+        context={"request": request},
     )
-
 
 @app.get("/api/sample-input")
 async def api_sample_input():

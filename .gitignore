@@ -23,3 +23,7 @@ data/scored_outputs/*
 
 layout-shell
 
+# Web demo layer is local/deploy artifact only
+web/
+vercel_static/
+

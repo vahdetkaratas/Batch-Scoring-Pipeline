@@ -23,3 +23,7 @@ data/scored_outputs/*
 
 layout-shell
 
+# Local-only demo/static layer
+web/
+vercel_static/
+

@@ -1,0 +1,29 @@
+{
+  "name": "Vahdettin Karatas",
+  "identity": "Freelance ML / data systems — batch scoring and operational tooling",
+  "location": "Prague, Czech Republic",
+  "portfolioUrl": "https://vahdetlabs.com/",
+  "avatarUrl": "https://vahdetkaratas.com/img/face-1.jpg",
+  "technicalFocus": [
+    "Repeatable batch scoring",
+    "CSV-to-scored handoffs",
+    "API-friendly delivery",
+    "Docker-based deployments",
+    "Clear scope and acceptance criteria"
+  ],
+  "reviewSectionTitle": "For client evaluation",
+  "footerLabel": "Commercial ML / data systems capability demo",
+  "footerTagline": "Batch scoring and data workflows for teams that need reliable outputs.",
+  "socialLinks": [
+    {
+      "label": "GitHub",
+      "href": "https://github.com/vahdetkaratas",
+      "iconClass": "fab fa-github"
+    },
+    {
+      "label": "LinkedIn",
+      "href": "https://linkedin.com/in/vahdetkaratas",
+      "iconClass": "fab fa-linkedin-in"
+    }
+  ]
+}

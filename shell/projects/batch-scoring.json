@@ -1,0 +1,259 @@
+{
+  "pageTitle": "Batch Scoring Pipeline - Applied ML / Data Systems",
+  "title": "Batch scoring pipeline",
+  "logoLine1": "Batch",
+  "logoLine2": "Scoring",
+  "themeColor": "#1a1a1f",
+  "footerProjectName": "Batch Scoring Pipeline",
+  "footerProjectSub": "Validated CSV in · scored CSV out · tests + container",
+  "heroTitle": "Batch scoring for production-shaped workloads",
+  "eyebrow": "Portfolio artifact · offline scoring",
+  "summary": "Validate tabular churn batches, align preprocessing with training, score with a joblib pipeline, and emit versioned CSV outputs. CLI-first with an optional FastAPI surface for upload → score → download demos.",
+  "metaDescription": "Batch churn scoring: input validation, training-aligned preprocessing, sklearn joblib inference, versioned outputs, pytest E2E, Docker image.",
+  "stack": [
+    "Python",
+    "pandas",
+    "scikit-learn",
+    "joblib",
+    "FastAPI",
+    "pytest",
+    "Docker"
+  ],
+  "limitations": [
+    "Batch / scheduled scoring only; not a low-latency online inference product.",
+    "Training lives outside this repo; preprocessing here must stay aligned with the trained pipeline.",
+    "Demo fixture model proves the path in CI; production models are environment-specific."
+  ],
+  "profiles": {
+    "recruiter": {
+      "pageTitle": "Batch Scoring Pipeline - Proof of work",
+      "eyebrow": "Portfolio artifact · reproducible batch ML",
+      "summary": "End-to-end batch path I can operate in production-shaped settings: strict CSV validation, preprocessing locked to training assumptions, deterministic scoring, and explicit outputs (probability, label, model version, timestamp). Scope includes CLI contracts, optional FastAPI wiring for review, Docker packaging, and pytest coverage over the full pipeline—not a notebook-only sketch.",
+      "heroNote": "Live demo and API share the scoring service host. If the browser demo is blocked (network, auth, or deploy config), use OpenAPI docs or curl against the same host.",
+      "footerProjectSub": "Proof-of-work · live service + repo-backed tests",
+      "projectLinks": [
+        {
+          "label": "GitHub",
+          "href": "https://github.com/vahdetkaratas/Batch-Scoring-Pipeline",
+          "external": true
+        },
+        {
+          "label": "Open live app / API",
+          "href": "https://score.vahdetkaratas.com/",
+          "external": true
+        },
+        {
+          "label": "API docs",
+          "href": "https://score.vahdetkaratas.com/docs",
+          "external": true
+        },
+        {
+          "label": "CV / profile",
+          "href": "https://vahdetkaratas.com/",
+          "external": true
+        }
+      ],
+      "reviewLinks": [
+        {
+          "label": "GitHub repository",
+          "href": "https://github.com/vahdetkaratas/Batch-Scoring-Pipeline",
+          "external": true
+        },
+        {
+          "label": "Open live app / API",
+          "href": "https://score.vahdetkaratas.com/",
+          "external": true
+        },
+        {
+          "label": "API docs (OpenAPI)",
+          "href": "https://score.vahdetkaratas.com/docs",
+          "external": true
+        },
+        {
+          "label": "Architecture notes",
+          "href": "https://github.com/vahdetkaratas/Batch-Scoring-Pipeline/blob/main/docs/ARCHITECTURE.md",
+          "external": true
+        },
+        {
+          "label": "CV / profile",
+          "href": "https://vahdetkaratas.com/",
+          "external": true
+        }
+      ],
+      "relatedMlSystems": [
+        {
+          "label": "Portfolio",
+          "href": "https://vahdetkaratas.com/portfolio",
+          "external": true
+        },
+        {
+          "label": "Batch scoring",
+          "href": "https://batch-scoring.vahdetkaratas.com/",
+          "external": true
+        },
+        {
+          "label": "Feature store",
+          "href": "https://feature-store.vahdetkaratas.com/",
+          "external": true
+        },
+        {
+          "label": "Vahdetlabs",
+          "href": "https://vahdetlabs.com/",
+          "external": true
+        },
+        {
+          "label": "Monitoring & data quality",
+          "href": "https://monitoring.vahdetlabs.com/",
+          "external": true
+        },
+        {
+          "label": "Customer churn prediction",
+          "href": "https://churn.vahdetlabs.com/",
+          "external": true
+        }
+      ],
+      "relatedDataTools": [
+        {
+          "label": "Data cleaning toolkit",
+          "href": "https://data-cleaning.vahdetlabs.com/",
+          "external": true
+        },
+        {
+          "label": "EDA report generator",
+          "href": "https://eda-report.vahdetlabs.com/",
+          "external": true
+        },
+        {
+          "label": "Forecasting demo",
+          "href": "https://forecasting.vahdetlabs.com/",
+          "external": true
+        },
+        {
+          "label": "CSV analytics",
+          "href": "https://ai-analysis.vahdetlabs.com/",
+          "external": true
+        },
+        {
+          "label": "KPI dashboard",
+          "href": "https://kpi-dashboard.vahdetlabs.com/",
+          "external": true
+        }
+      ]
+    },
+    "commercial": {
+      "pageTitle": "Batch Scoring - Client capability",
+      "eyebrow": "Capability demo · repeatable batch scoring",
+      "summary": "Turn recurring customer or account CSV extracts into scored outputs on a schedule or on demand: validation gates bad rows early, the same preprocessing assumptions as training keep scores comparable run-to-run, and you get a clean CSV handoff for CRM, analytics, or ops queues. A pilot scopes input schema, hosting, and SLAs—this page points at the public reference deployment for evaluation.",
+      "heroNote": "Public reference deployment for evaluation. Production use is contract-specific: VPC placement, data handling, and your release process—not this static shell page.",
+      "footerProjectSub": "Client evaluation · same batch contract as pilots",
+      "projectLinks": [
+        {
+          "label": "Discuss use case",
+          "href": "https://vahdetlabs.com/contact",
+          "external": true
+        },
+        {
+          "label": "Vahdetlabs",
+          "href": "https://vahdetlabs.com/",
+          "external": true
+        },
+        {
+          "label": "Open live app / API",
+          "href": "https://score.vahdetkaratas.com/",
+          "external": true
+        },
+        {
+          "label": "API docs",
+          "href": "https://score.vahdetkaratas.com/docs",
+          "external": true
+        }
+      ],
+      "reviewLinks": [
+        {
+          "label": "Discuss use case",
+          "href": "https://vahdetlabs.com/contact",
+          "external": true
+        },
+        {
+          "label": "Vahdetlabs home",
+          "href": "https://vahdetlabs.com/",
+          "external": true
+        },
+        {
+          "label": "Open live app / API",
+          "href": "https://score.vahdetkaratas.com/",
+          "external": true
+        },
+        {
+          "label": "API docs (OpenAPI)",
+          "href": "https://score.vahdetkaratas.com/docs",
+          "external": true
+        },
+        {
+          "label": "Source repository",
+          "href": "https://github.com/vahdetkaratas/Batch-Scoring-Pipeline",
+          "external": true
+        }
+      ],
+      "relatedMlSystems": [
+        {
+          "label": "Portfolio",
+          "href": "https://vahdetkaratas.com/portfolio",
+          "external": true
+        },
+        {
+          "label": "Batch scoring",
+          "href": "https://batch-scoring.vahdetlabs.com/",
+          "external": true
+        },
+        {
+          "label": "Feature store",
+          "href": "https://feature-store.vahdetlabs.com/",
+          "external": true
+        },
+        {
+          "label": "Vahdetlabs",
+          "href": "https://vahdetlabs.com/",
+          "external": true
+        },
+        {
+          "label": "Monitoring & data quality",
+          "href": "https://monitoring.vahdetlabs.com/",
+          "external": true
+        },
+        {
+          "label": "Customer churn prediction",
+          "href": "https://churn.vahdetlabs.com/",
+          "external": true
+        }
+      ],
+      "relatedDataTools": [
+        {
+          "label": "Data cleaning toolkit",
+          "href": "https://data-cleaning.vahdetlabs.com/",
+          "external": true
+        },
+        {
+          "label": "EDA report generator",
+          "href": "https://eda-report.vahdetlabs.com/",
+          "external": true
+        },
+        {
+          "label": "Forecasting demo",
+          "href": "https://forecasting.vahdetlabs.com/",
+          "external": true
+        },
+        {
+          "label": "CSV analytics",
+          "href": "https://ai-analysis.vahdetlabs.com/",
+          "external": true
+        },
+        {
+          "label": "KPI dashboard",
+          "href": "https://kpi-dashboard.vahdetlabs.com/",
+          "external": true
+        }
+      ]
+    }
+  }
+}

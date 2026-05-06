@@ -1,0 +1,126 @@
+<section class="proj-section" aria-labelledby="overview-heading">
+  <h2 id="overview-heading">Overview</h2>
+  <div class="proj-prose">
+    <p><strong>Problem.</strong> After training, a lot of value is in recurring <strong>batch scores</strong> on customer or account tables—not every product needs a real-time endpoint.</p>
+    <p><strong>System.</strong> One pipeline: load CSV → validate schema and value ranges → preprocess with the same feature assumptions as training → <code>predict_proba</code> via a serialized sklearn pipeline → postprocess to probabilities, thresholded labels, model version, and UTC timestamp → write scored CSV (optional run manifest).</p>
+    <p><strong>Boundary.</strong> This repository is <strong>scoring-only</strong>: the trained <code>joblib</code> model is supplied by your training project; preprocessing here must stay aligned with that artifact.</p>
+  </div>
+</section>
+
+<section class="proj-section" aria-labelledby="flow-heading">
+  <h2 id="flow-heading">Workflow</h2>
+  <p class="proj-section-intro">End-to-end path for one batch file:</p>
+  <div class="proj-arch-visual" aria-label="High-level batch flow">
+    <span class="proj-arch-node">CSV in</span>
+    <span class="proj-arch-arrow" aria-hidden="true">→</span>
+    <span class="proj-arch-node">Validate</span>
+    <span class="proj-arch-arrow" aria-hidden="true">→</span>
+    <span class="proj-arch-node">Preprocess</span>
+    <span class="proj-arch-arrow" aria-hidden="true">→</span>
+    <span class="proj-arch-node">Score</span>
+    <span class="proj-arch-arrow" aria-hidden="true">→</span>
+    <span class="proj-arch-node">Scored CSV out</span>
+  </div>
+  <p class="proj-arch-caption">Orchestrated by <code>run_batch_scoring(...)</code>; CLI entrypoint wraps the same code path with non-zero exit on failure.</p>
+  <ol class="proj-steps">
+    <li class="proj-step">
+      <span class="proj-step-num">1</span>
+      <div class="proj-step-body">
+        <h3 class="proj-step-title">Load batch</h3>
+        <p>Read Telco-style churn columns; fail fast on missing columns or parse issues.</p>
+      </div>
+    </li>
+    <li class="proj-step">
+      <span class="proj-step-num">2</span>
+      <div class="proj-step-body">
+        <h3 class="proj-step-title">Validate</h3>
+        <p>Input checks before any model call—reduces silent garbage-in scores.</p>
+      </div>
+    </li>
+    <li class="proj-step">
+      <span class="proj-step-num">3</span>
+      <div class="proj-step-body">
+        <h3 class="proj-step-title">Preprocess</h3>
+        <p>Training-aligned transforms for the feature matrix passed to the pipeline.</p>
+      </div>
+    </li>
+    <li class="proj-step">
+      <span class="proj-step-num">4</span>
+      <div class="proj-step-body">
+        <h3 class="proj-step-title">Score</h3>
+        <p><code>joblib</code> pipeline load once per run; batch <code>predict_proba</code> for all rows.</p>
+      </div>
+    </li>
+    <li class="proj-step">
+      <span class="proj-step-num">5</span>
+      <div class="proj-step-body">
+        <h3 class="proj-step-title">Postprocess &amp; save</h3>
+        <p>Output columns include <code>customer_id</code>, <code>churn_score</code>, <code>predicted_label</code>, <code>model_version</code>, <code>scoring_timestamp</code>; optional JSON manifest next to the CSV.</p>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<section class="proj-section" aria-labelledby="features-heading">
+  <h2 id="features-heading">Features</h2>
+  <div class="proj-card-grid">
+    <div class="proj-card">
+      <h3 class="proj-card-title">Input validation</h3>
+      <p>Schema and sanity checks before scoring; failures surface as CLI/API errors instead of partial outputs.</p>
+    </div>
+    <div class="proj-card">
+      <h3 class="proj-card-title">Training alignment</h3>
+      <p>Preprocessing module is the contract between training-time features and batch inference.</p>
+    </div>
+    <div class="proj-card">
+      <h3 class="proj-card-title">Versioned outputs</h3>
+      <p>Model version string and timestamp on every row; optional run manifest records threshold and paths.</p>
+    </div>
+    <div class="proj-card">
+      <h3 class="proj-card-title">CLI + exit codes</h3>
+      <p><code>python -m src.pipeline.run_batch_scoring</code> with flags for input, output, threshold, model path, and verbosity.</p>
+    </div>
+    <div class="proj-card">
+      <h3 class="proj-card-title">FastAPI demo (optional)</h3>
+      <p>Upload CSV, receive JSON summary + preview, download scored file—same scoring function as the CLI, not a parallel implementation.</p>
+    </div>
+    <div class="proj-card">
+      <h3 class="proj-card-title">Docker image</h3>
+      <p>Single Dockerfile: dependencies, app code, fixtures for demo model; suitable for VPS-style deploy behind a reverse proxy.</p>
+    </div>
+  </div>
+</section>
+
+<section class="proj-section" aria-labelledby="stack-heading">
+  <h2 id="stack-heading">Tech stack</h2>
+  <ul class="proj-tech-list">
+    <li><strong>Core:</strong> Python 3.10+, pandas, scikit-learn, joblib, PyYAML</li>
+    <li><strong>Quality:</strong> pytest; committed E2E over fixture CSV + small pipeline artifact</li>
+    <li><strong>Optional HTTP:</strong> FastAPI, Uvicorn, Jinja templates (demo upload path)</li>
+    <li><strong>Ops:</strong> Dockerfile (slim Python base); compose/orchestration left to your environment</li>
+  </ul>
+</section>
+
+<section class="proj-section" aria-labelledby="deploy-heading">
+  <h2 id="deploy-heading">Deployment &amp; live interface</h2>
+  <div class="proj-prose">
+    <p>The canonical live service is <strong><a href="https://score.vahdetkaratas.com/" target="_blank" rel="noopener noreferrer">https://score.vahdetkaratas.com/</a></strong>: HTML shell plus JSON/CSV endpoints for the batch demo. OpenAPI is exposed at <strong><a href="https://score.vahdetkaratas.com/docs" target="_blank" rel="noopener noreferrer"><code>/docs</code></a></strong> when FastAPI is enabled on that host.</p>
+    <p>Batch scoring itself does not require a browser: cron, Airflow, GitHub Actions, or a simple VM running the CLI against mounted input/output directories is the primary shape.</p>
+    <p>Repository layout and run commands are in <a href="https://github.com/vahdetkaratas/Batch-Scoring-Pipeline/blob/main/README.md" target="_blank" rel="noopener noreferrer"><code>README.md</code></a>; architecture map in <code>docs/ARCHITECTURE.md</code>.</p>
+  </div>
+</section>
+
+<section class="proj-section" aria-labelledby="limitations-heading">
+  <h2 id="limitations-heading">Limitations</h2>
+  <div class="proj-prose">
+    <p>Not a model training repo; not a feature store; not a monitoring product. No built-in drift detection, retraining loop, or multi-tenant auth—those belong upstream or around this job.</p>
+    <p>Throughput and latency are batch-oriented: large files should be sized with worker memory and wall-clock expectations in mind.</p>
+  </div>
+</section>
+
+<section class="proj-section" aria-labelledby="value-heading">
+  <h2 id="value-heading">Why this project</h2>
+  <div class="proj-prose">
+    <p>Shows a complete <strong>file-in → validate → score → file-out</strong> contract with tests that exercise the real path, plus a container story for how the same code ships. Useful when interviewers or clients ask for evidence you can own the boring, valuable half of ML ops: repeatable batch outputs with clear boundaries.</p>
+  </div>
+</section>

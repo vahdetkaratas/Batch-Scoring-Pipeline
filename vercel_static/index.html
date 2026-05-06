@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Batch churn scoring: validated CSV in, scored CSV out. Training-aligned preprocessing, predict_proba, CLI with exit codes, pytest. Run locally or in CI — this site does not host a live model.">
+  <meta name="theme-color" content="#1a1a1f">
+  <link rel="canonical" href="https://batch-scoring.vahdetkaratas.com/">
+  <meta property="og:title" content="Batch Scoring Pipeline">
+  <meta property="og:description" content="Validated CSV → scored CSV: training-aligned preprocessing, joblib model, CLI and pytest. Not a hosted API — scoring runs in your environment.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://batch-scoring.vahdetkaratas.com/">
+  <meta property="og:site_name" content="Batch Scoring Pipeline">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Batch Scoring Pipeline">
+  <meta name="twitter:description" content="Batch churn scoring: validated CSV in, scored CSV out. CLI, training-aligned preprocessing, pytest. No live model on the static site.">
+  <title>Batch Scoring Pipeline — validated CSV → scored CSV (CLI)</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Poppins:wght@200;300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="shell.css">
+  <link rel="stylesheet" href="project.css">
+</head>
+<body>
+  <div class="shell-outer">
+    <div class="shell-card">
+      <div class="art-info-bar">
+        <div class="art-info-bar-frame">
+          <div class="art-info-bar-header">
+            <button type="button" class="art-info-bar-btn" aria-label="Toggle info" aria-expanded="false">
+              <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <div class="art-header">
+            <div class="art-avatar">
+              <a href="https://vahdetkaratas.com/img/face-1.jpg" class="art-avatar-curtain">
+                <img src="https://vahdetkaratas.com/img/face-1.jpg" alt="Vahdettin Karataş" width="90" height="90">
+                <i class="fas fa-expand" aria-hidden="true"></i>
+              </a>
+              <div class="art-lamp-light">
+                <div class="art-available-lamp"></div>
+              </div>
+            </div>
+            <h5 class="art-name mb-10"><a href="https://vahdetkaratas.com/">Vahdettin Karataş</a></h5>
+            <div class="art-sm-text">Data &amp; Reporting Consultant</div>
+            <div class="art-sm-text art-muted mb-10">Available for 1-2 projects / month</div>
+          </div>
+
+          <div id="scrollbar2" class="art-scroll-frame">
+            <div class="art-table p-15-15">
+              <ul>
+                <li><h6>Location:</h6><span>Prague, Czech Republic</span></li>
+              </ul>
+            </div>
+
+            <div class="art-ls-divider"></div>
+
+            <div class="art-knowledge-block p-30-15">
+              <h6 class="mb-15">Tools &amp; Focus Areas</h6>
+              <ul class="art-knowledge-list p-15-0">
+                <li>Dashboards &amp; reporting</li>
+                <li>Data cleaning &amp; analysis</li>
+                <li>Reporting workflows</li>
+                <li>Data pipelines &amp; ETL</li>
+                <li>ML training → serving patterns</li>
+              </ul>
+            </div>
+
+            <div class="art-knowledge-block p-30-15">
+              <h6 class="mb-15">How I can help</h6>
+              <ul class="art-knowledge-list p-15-0">
+                <li>Client work: dashboards, reports, automation</li>
+                <li>ML systems &amp; interactive apps (see menu)</li>
+                <li>Data cleaning &amp; trustworthy spreadsheets</li>
+              </ul>
+            </div>
+
+            <div class="art-knowledge-block p-30-15">
+              <h6 class="mb-15">Recent outcomes</h6>
+              <ul class="art-knowledge-list p-15-0">
+                <li>Weekly reporting time reduced from hours to minutes</li>
+                <li>Cleaner spreadsheets that are easier to maintain</li>
+                <li>Teams get faster answers from their data</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="art-ls-social">
+            <a href="https://github.com/vahdetkaratas" target="_blank" rel="noopener noreferrer" title="Github"><i class="fab fa-github"></i></a>
+            <a href="https://linkedin.com/in/vahdetkaratas" target="_blank" rel="noopener noreferrer" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="https://www.facebook.com/vakasoft/" target="_blank" rel="noopener noreferrer" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="shell-main-wrap" id="shellMainWrap">
+        <div class="shell-mobile-curtain" id="shellMobileCurtain" aria-hidden="true"></div>
+        <div class="shell-main">
+          <main class="shell-scroll" id="shellScroll">
+            <div class="shell-content" id="projectContent">
+              <div class="batch-page">
+                <a class="skip" href="#main">Skip to content</a>
+
+                <div class="wrap">
+                  <header>
+                    <div class="logo" id="top">Batch <span>Scoring</span></div>
+                    <div class="nav-actions">
+                      <!-- Replace vahdetkaratas/Batch-Scoring-Pipeline with your GitHub path -->
+                      <a class="btn btn-ghost" href="https://github.com/vahdetkaratas/Batch-Scoring-Pipeline#readme" target="_blank" rel="noopener">README &amp; setup</a>
+                      <a class="btn btn-primary" href="https://github.com/vahdetkaratas/Batch-Scoring-Pipeline" target="_blank" rel="noopener">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                        Source code
+                      </a>
+                    </div>
+                  </header>
+
+                  <div id="main">
+                    <section class="hero">
+                      <span class="hero-badge">Portfolio · ML systems</span>
+                      <h1>Batch scoring for real pipelines.</h1>
+                      <p class="hero-lead">
+                        Turn a customer CSV into a scored file: validation, training-aligned features, <code style="font-family:var(--font-mono);font-size:0.92em;color:var(--accent)">predict_proba</code>, versioned output. Built for jobs that look like ETL — not microsecond APIs.
+                      </p>
+                      <div class="hero-cta">
+                        <a class="btn btn-primary" href="https://github.com/vahdetkaratas/Batch-Scoring-Pipeline" target="_blank" rel="noopener">
+                          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                          View on GitHub
+                        </a>
+                        <a class="btn btn-ghost" href="https://github.com/vahdetkaratas/Batch-Scoring-Pipeline#readme" target="_blank" rel="noopener">How to run</a>
+                      </div>
+                      <p class="hero-note">This page is a static showcase only — no inference runs here. Use the repo CLI on your machine or in CI to score batches.</p>
+                      <div class="metrics" aria-label="Project facts">
+                        <div><span>Tests</span> · pytest suite</div>
+                        <div><span>CLI</span> · flags &amp; exit codes</div>
+                        <div><span>Optional</span> · run .meta.json</div>
+                      </div>
+                    </section>
+
+                    <section id="shape" aria-labelledby="h-shape">
+                      <h2 id="h-shape">Positioning</h2>
+                      <div class="compare">
+                        <article class="card featured">
+                          <h3>This project: batch</h3>
+                          <p>File or schedule driven: ingest → validate → score → hand off CSV (or parquet) to CRM, analytics, or compliance. Same pattern as many production churn or risk batch jobs.</p>
+                        </article>
+                        <article class="card">
+                          <h3>Contrast: online API</h3>
+                          <p>Request/response, SLOs, autoscaling. Valuable, but a different skill slice. This repo stays intentionally narrow: offline orchestration and clean batch output.</p>
+                        </article>
+                      </div>
+                    </section>
+
+                    <section id="flow" aria-labelledby="h-flow">
+                      <h2 id="h-flow">End-to-end flow</h2>
+                      <div class="pipeline-wrap">
+                        <div class="pipeline" role="list">
+                          <div class="pipe-step" role="listitem"><span class="step-label">In</span><span class="step-name">Raw CSV</span></div>
+                          <div class="pipe-step" role="listitem"><span class="step-label">Gate</span><span class="step-name">Validate</span></div>
+                          <div class="pipe-step" role="listitem"><span class="step-label">Prep</span><span class="step-name">Preprocess</span></div>
+                          <div class="pipe-step" role="listitem"><span class="step-label">Score</span><span class="step-name">Model</span></div>
+                          <div class="pipe-step" role="listitem"><span class="step-label">Out</span><span class="step-name">Scored CSV</span></div>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section id="stack" aria-labelledby="h-stack">
+                      <h2 id="h-stack">Stack</h2>
+                      <div class="stack">
+                        <span class="tag">Python</span>
+                        <span class="tag">pandas</span>
+                        <span class="tag">scikit-learn</span>
+                        <span class="tag">joblib</span>
+                        <span class="tag">PyYAML</span>
+                        <span class="tag">pytest</span>
+                      </div>
+                    </section>
+
+                    <section id="contract" aria-labelledby="h-contract">
+                      <h2 id="h-contract">I/O contract</h2>
+                      <div class="schemas">
+                        <div class="schema-box">
+                          <h3>Input (Telco-style)</h3>
+                          <pre>customerID, tenure, Contract,
+MonthlyCharges, TotalCharges,
+PhoneService, InternetService, …</pre>
+                        </div>
+                        <div class="schema-box">
+                          <h3>Output</h3>
+                          <pre><span class="k">customer_id</span>
+<span class="k">churn_score</span>
+<span class="k">predicted_label</span>
+<span class="k">model_version</span>
+<span class="k">scoring_timestamp</span></pre>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section id="notebook" aria-labelledby="h-notebook">
+                      <h2 id="h-notebook">Output review (Jupyter)</h2>
+                      <div class="notebook-cta">
+                        <strong>After you run the pipeline locally,</strong> the repo includes a notebook that validates the scored CSV (schema, row counts, probabilities in <code>[0,1]</code>) and plots the churn-score distribution.
+                        <br><br>
+                        <a href="https://github.com/vahdetkaratas/Batch-Scoring-Pipeline/blob/main/notebooks/01_scoring_output_review.ipynb" target="_blank" rel="noopener">View notebook on GitHub →</a>
+                        <span style="opacity:0.75;font-size:0.85em;"> &nbsp;·&nbsp; readable in the browser; clone the repo to execute cells.</span>
+                      </div>
+                    </section>
+
+                    <section id="pitch" aria-labelledby="h-pitch">
+                      <h2 id="h-pitch">Interview pitch (30 seconds)</h2>
+                      <div class="pitch">
+                        <ul>
+                          <li><strong>Problem:</strong> After training, a lot of value is in <em>recurring batch scores</em> — not every product needs a real-time endpoint.</li>
+                          <li><strong>What I shipped:</strong> One pipeline: strict input checks, same feature engineering as training, probabilities and labels, plus model version and timestamp on every row.</li>
+                          <li><strong>Ops detail:</strong> CLI for cron/CI, non-zero exit on failure, optional JSON manifest so you know which input and threshold produced a file.</li>
+                        </ul>
+                      </div>
+                    </section>
+                  </div>
+
+                  <footer class="batch-project-footer">
+                    <p class="name">Batch Scoring Pipeline</p>
+                    <p style="margin:0.35rem 0 0;font-size:0.76rem;">Offline ML batch job · showcase page</p>
+                  </footer>
+                </div>
+              </div>
+            </div>
+
+            <div class="container-fluid p-30-0">
+              <footer class="footer">
+                <div class="art-copy">© <span id="shellYear"></span> Vahdettin Karataş. All rights reserved.</div>
+                <div class="footer-developer">ML systems, reporting &amp; automation.</div>
+              </footer>
+            </div>
+          </main>
+        </div>
+
+        <aside class="shell-rail" aria-label="Home">
+          <div class="shell-rail-header">
+            <a class="shell-rail-home" href="https://vahdetkaratas.com/" id="shellHomeLink" title="Portfolio home" aria-label="Portfolio home">
+              <svg viewBox="0 0 24 24" aria-hidden="true" class="shell-rail-home-icon">
+                <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8h5z"/>
+              </svg>
+            </a>
+          </div>
+          <div class="shell-rail-spacer" aria-hidden="true"></div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('shellYear').textContent = new Date().getFullYear();
+    (function () {
+      var btn = document.querySelector('.art-info-bar-btn');
+      var bar = document.querySelector('.art-info-bar');
+      var curtain = document.getElementById('shellMobileCurtain');
+      if (!btn || !bar) return;
+      function setOpen(open) {
+        bar.classList.toggle('art-active', open);
+        btn.classList.toggle('art-active', open);
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (curtain) {
+          curtain.classList.toggle('is-open', open);
+          curtain.setAttribute('aria-hidden', open ? 'false' : 'true');
+        }
+      }
+      btn.addEventListener('click', function () {
+        setOpen(!bar.classList.contains('art-active'));
+      });
+      if (curtain) {
+        curtain.addEventListener('click', function () {
+          setOpen(false);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

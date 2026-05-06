@@ -8,7 +8,7 @@
   "footerProjectSub": "Validated CSV in · scored CSV out · tests + container",
   "heroTitle": "Batch scoring for production-shaped workloads",
   "eyebrow": "Portfolio artifact · offline scoring",
-  "summary": "Validate tabular churn batches, align preprocessing with training, score with a joblib pipeline, and emit versioned CSV outputs. CLI-first with an optional FastAPI surface for upload → score → download demos.",
+  "summary": "Validate tabular churn batches, align preprocessing with training, score with a joblib pipeline, and emit versioned CSV outputs. CLI-first, with an optional FastAPI scoring service for upload → score → download over HTTP.",
   "metaDescription": "Batch churn scoring: input validation, training-aligned preprocessing, sklearn joblib inference, versioned outputs, pytest E2E, Docker image.",
   "stack": [
     "Python",
@@ -29,8 +29,8 @@
       "pageTitle": "Batch Scoring Pipeline - Proof of work",
       "eyebrow": "Portfolio artifact · reproducible batch ML",
       "summary": "End-to-end batch path I can operate in production-shaped settings: strict CSV validation, preprocessing locked to training assumptions, deterministic scoring, and explicit outputs (probability, label, model version, timestamp). Scope includes CLI contracts, optional FastAPI wiring for review, Docker packaging, and pytest coverage over the full pipeline—not a notebook-only sketch.",
-      "heroNote": "Live demo and API share the scoring service host. If the browser demo is blocked (network, auth, or deploy config), use OpenAPI docs or curl against the same host.",
-      "footerProjectSub": "Proof-of-work · live service + repo-backed tests",
+      "heroNote": "The live host runs the scoring service: OpenAPI, batch HTTP routes, and a small browser helper on the same origin. If the browser helper is blocked, use `/docs` or curl against the same host.",
+      "footerProjectSub": "Proof-of-work · live scoring service + repo-backed tests",
       "projectLinks": [
         {
           "label": "GitHub",
@@ -38,12 +38,12 @@
           "external": true
         },
         {
-          "label": "Open live app / API",
+          "label": "Review live scoring service",
           "href": "https://score.vahdetkaratas.com/",
           "external": true
         },
         {
-          "label": "API docs",
+          "label": "Review scoring API (OpenAPI)",
           "href": "https://score.vahdetkaratas.com/docs",
           "external": true
         },
@@ -60,12 +60,12 @@
           "external": true
         },
         {
-          "label": "Open live app / API",
+          "label": "Review live scoring service",
           "href": "https://score.vahdetkaratas.com/",
           "external": true
         },
         {
-          "label": "API docs (OpenAPI)",
+          "label": "Review scoring API (OpenAPI)",
           "href": "https://score.vahdetkaratas.com/docs",
           "external": true
         },
@@ -144,7 +144,7 @@
       "pageTitle": "Batch Scoring - Client capability",
       "eyebrow": "Capability demo · repeatable batch scoring",
       "summary": "Turn recurring customer or account CSV extracts into scored outputs on a schedule or on demand: validation gates bad rows early, the same preprocessing assumptions as training keep scores comparable run-to-run, and you get a clean CSV handoff for CRM, analytics, or ops queues. A pilot scopes input schema, hosting, and SLAs—this page points at the public reference deployment for evaluation.",
-      "heroNote": "Public reference deployment for evaluation. Production use is contract-specific: VPC placement, data handling, and your release process—not this static shell page.",
+      "heroNote": "Public reference scoring service for evaluation. Production use is contract-specific: VPC placement, data handling, and your release process—not this static marketing shell.",
       "footerProjectSub": "Client evaluation · same batch contract as pilots",
       "projectLinks": [
         {
@@ -158,12 +158,12 @@
           "external": true
         },
         {
-          "label": "Open live app / API",
+          "label": "Open scoring demo",
           "href": "https://score.vahdetkaratas.com/",
           "external": true
         },
         {
-          "label": "API docs",
+          "label": "Review scoring API (OpenAPI)",
           "href": "https://score.vahdetkaratas.com/docs",
           "external": true
         }
@@ -180,12 +180,12 @@
           "external": true
         },
         {
-          "label": "Open live app / API",
+          "label": "Review scoring capability",
           "href": "https://score.vahdetkaratas.com/",
           "external": true
         },
         {
-          "label": "API docs (OpenAPI)",
+          "label": "Review scoring API (OpenAPI)",
           "href": "https://score.vahdetkaratas.com/docs",
           "external": true
         },

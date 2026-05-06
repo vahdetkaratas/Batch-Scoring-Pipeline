@@ -66,8 +66,8 @@
               <ul class="art-knowledge-list p-15-0">
                 <li><a href="https://vahdetlabs.com/contact" target="_blank" rel="noopener noreferrer">Discuss use case</a></li>
 <li><a href="https://vahdetlabs.com/" target="_blank" rel="noopener noreferrer">Vahdetlabs home</a></li>
-<li><a href="https://score.vahdetkaratas.com/" target="_blank" rel="noopener noreferrer">Open live app / API</a></li>
-<li><a href="https://score.vahdetkaratas.com/docs" target="_blank" rel="noopener noreferrer">API docs (OpenAPI)</a></li>
+<li><a href="https://score.vahdetkaratas.com/" target="_blank" rel="noopener noreferrer">Review scoring capability</a></li>
+<li><a href="https://score.vahdetkaratas.com/docs" target="_blank" rel="noopener noreferrer">Review scoring API (OpenAPI)</a></li>
 <li><a href="https://github.com/vahdetkaratas/Batch-Scoring-Pipeline" target="_blank" rel="noopener noreferrer">Source repository</a></li>
               </ul>
             </div>
@@ -105,8 +105,8 @@
                     <div class="nav-actions">
                       <a class="btn btn-primary" href="https://vahdetlabs.com/contact" target="_blank" rel="noopener noreferrer">Discuss use case</a>
 <a class="btn btn-ghost" href="https://vahdetlabs.com/" target="_blank" rel="noopener noreferrer">Vahdetlabs</a>
-<a class="btn btn-ghost" href="https://score.vahdetkaratas.com/" target="_blank" rel="noopener noreferrer">Open live app / API</a>
-<a class="btn btn-ghost" href="https://score.vahdetkaratas.com/docs" target="_blank" rel="noopener noreferrer">API docs</a>
+<a class="btn btn-ghost" href="https://score.vahdetkaratas.com/" target="_blank" rel="noopener noreferrer">Open scoring demo</a>
+<a class="btn btn-ghost" href="https://score.vahdetkaratas.com/docs" target="_blank" rel="noopener noreferrer">Review scoring API (OpenAPI)</a>
                     </div>
                   </header>
 
@@ -118,10 +118,10 @@
                       <div class="hero-cta">
                         <a class="btn btn-primary" href="https://vahdetlabs.com/contact" target="_blank" rel="noopener noreferrer">Discuss use case</a>
 <a class="btn btn-ghost" href="https://vahdetlabs.com/" target="_blank" rel="noopener noreferrer">Vahdetlabs</a>
-<a class="btn btn-ghost" href="https://score.vahdetkaratas.com/" target="_blank" rel="noopener noreferrer">Open live app / API</a>
-<a class="btn btn-ghost" href="https://score.vahdetkaratas.com/docs" target="_blank" rel="noopener noreferrer">API docs</a>
+<a class="btn btn-ghost" href="https://score.vahdetkaratas.com/" target="_blank" rel="noopener noreferrer">Open scoring demo</a>
+<a class="btn btn-ghost" href="https://score.vahdetkaratas.com/docs" target="_blank" rel="noopener noreferrer">Review scoring API (OpenAPI)</a>
                       </div>
-                      <p class="hero-note">Public reference deployment for evaluation. Production use is contract-specific: VPC placement, data handling, and your release process—not this static shell page.</p>
+                      <p class="hero-note">Public reference scoring service for evaluation. Production use is contract-specific: VPC placement, data handling, and your release process—not this static marketing shell.</p>
                       <div class="metrics" aria-label="Project facts">
                         <div><span>Python</span></div>
 <div><span>pandas</span></div>
@@ -217,8 +217,8 @@
       <p><code>python -m src.pipeline.run_batch_scoring</code> with flags for input, output, threshold, model path, and verbosity.</p>
     </div>
     <div class="proj-card">
-      <h3 class="proj-card-title">FastAPI demo (optional)</h3>
-      <p>Upload CSV, receive JSON summary + preview, download scored file—same scoring function as the CLI, not a parallel implementation.</p>
+      <h3 class="proj-card-title">Scoring service demo (optional)</h3>
+      <p>Small HTTP surface on the scoring host: upload CSV, JSON summary + preview, download scored file—same <code>run_batch_scoring</code> path as the CLI, not a separate dashboard product.</p>
     </div>
     <div class="proj-card">
       <h3 class="proj-card-title">Docker image</h3>
@@ -232,7 +232,7 @@
   <ul class="proj-tech-list">
     <li><strong>Core:</strong> Python 3.10+, pandas, scikit-learn, joblib, PyYAML</li>
     <li><strong>Quality:</strong> pytest; committed E2E over fixture CSV + small pipeline artifact</li>
-    <li><strong>Optional HTTP:</strong> FastAPI, Uvicorn, Jinja templates (demo upload path)</li>
+    <li><strong>Optional HTTP:</strong> FastAPI + Uvicorn expose OpenAPI and batch scoring routes; Jinja serves a minimal upload/preview helper (not a Streamlit-style app).</li>
     <li><strong>Ops:</strong> Dockerfile (slim Python base); compose/orchestration left to your environment</li>
   </ul>
 </section>
@@ -240,7 +240,7 @@
 <section class="proj-section" aria-labelledby="deploy-heading">
   <h2 id="deploy-heading">Deployment &amp; live interface</h2>
   <div class="proj-prose">
-    <p>The canonical live service is <strong><a href="https://score.vahdetkaratas.com/" target="_blank" rel="noopener noreferrer">https://score.vahdetkaratas.com/</a></strong>: HTML shell plus JSON/CSV endpoints for the batch demo. OpenAPI is exposed at <strong><a href="https://score.vahdetkaratas.com/docs" target="_blank" rel="noopener noreferrer"><code>/docs</code></a></strong> when FastAPI is enabled on that host.</p>
+    <p>The canonical live <strong>scoring service</strong> is <strong><a href="https://score.vahdetkaratas.com/" target="_blank" rel="noopener noreferrer">https://score.vahdetkaratas.com/</a></strong>: batch HTTP routes (JSON + CSV), OpenAPI at <strong><a href="https://score.vahdetkaratas.com/docs" target="_blank" rel="noopener noreferrer"><code>/docs</code></a></strong>, and a minimal browser helper for upload → preview → download on the same host. This is a <strong>service / API demo</strong>, not a standalone analytics dashboard.</p>
     <p>Batch scoring itself does not require a browser: cron, Airflow, GitHub Actions, or a simple VM running the CLI against mounted input/output directories is the primary shape.</p>
     <p>Repository layout and run commands are in <a href="https://github.com/vahdetkaratas/Batch-Scoring-Pipeline/blob/main/README.md" target="_blank" rel="noopener noreferrer"><code>README.md</code></a>; architecture map in <code>docs/ARCHITECTURE.md</code>.</p>
   </div>
